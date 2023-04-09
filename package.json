@@ -20,6 +20,6 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
-    "start:dev": "go run main.go startserver"
+    "start:dev": "go run main.go"
   }
 }

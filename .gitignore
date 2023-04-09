@@ -63,3 +63,7 @@ yarn.lock
 
 # Go workspace file
 go.work
+
+
+# database files
+db/

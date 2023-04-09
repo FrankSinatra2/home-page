@@ -12,7 +12,7 @@ const stylesHandler = 'style-loader';
 
 
 const config = {
-    entry: './src/index.ts',
+    entry: './public/index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
     },
