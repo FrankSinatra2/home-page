@@ -1,88 +1,15 @@
 package main
 
 import (
-	"errors"
-	"net/http"
-	"strconv"
-
-	"github.com/FrankSinatra2/home-page/pkg/contracts"
+	"github.com/FrankSinatra2/home-page/internal/controllers"
 	"github.com/FrankSinatra2/home-page/pkg/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+func CreateGroup(c *gin.Context) {
 
-func CreateApplicationLauncherHandler(c *gin.Context) {
-	body := contracts.CreateApplicationLauncher{}
-
-	err := c.BindJSON(&body)
-
-	if err != nil {
-		c.Status(http.StatusUnprocessableEntity)
-		return
-	}
-
-	model := models.ApplicationLauncher{
-		Title:          body.Title,
-		ApplicationUrl: body.ApplicationUrl,
-		Icon:           body.Icon,
-		GroupId:        body.GroupId,
-	}
-
-	result := db.Create(&model)
-
-	if result.Error != nil {
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	res := contracts.GetApplicationLauncher{
-		ID:             model.ID,
-		Title:          model.Title,
-		Icon:           model.Icon,
-		ApplicationUrl: model.ApplicationUrl,
-		GroupId:        model.GroupId,
-		CreatedAt:      model.CreatedAt,
-		UpdatedAt:      model.UpdatedAt,
-	}
-
-	c.JSON(http.StatusCreated, res)
-}
-
-func GetApplicationLauncherHandler(c *gin.Context) {
-	id := c.Param("id")
-
-	dbId, err := strconv.Atoi(id)
-
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	model := models.ApplicationLauncher{}
-	if err = db.Find(&model, dbId).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.Status(http.StatusNotFound)
-		} else {
-			c.Status(http.StatusInternalServerError)
-		}
-
-		return
-	}
-
-	res := contracts.GetApplicationLauncher{
-		ID:             model.ID,
-		Title:          model.Title,
-		Icon:           model.Icon,
-		ApplicationUrl: model.ApplicationUrl,
-		GroupId:        model.GroupId,
-		CreatedAt:      model.CreatedAt,
-		UpdatedAt:      model.UpdatedAt,
-	}
-
-	c.JSON(http.StatusCreated, res)
 }
 
 func main() {
@@ -102,13 +29,27 @@ func main() {
 		ApplicationLaunchers: []models.ApplicationLauncher{},
 	})
 
+	// Create Controllers
+	appLauncherCtrl := controllers.ApplicationLauncherController{
+		DB: db,
+	}
+
+	groupCtrl := controllers.GroupController{
+		DB: db,
+	}
+
 	// Initialize Enpoints
 	r := gin.Default()
-	r.POST("/v1/applicationLauncher", CreateApplicationLauncherHandler)
-	r.POST("/v1/applicationLauncher/:id", GetApplicationLauncherHandler)
+	r.POST("/v1/applicationLaunchers", appLauncherCtrl.CreateApplicationLauncher)
+	r.GET("/v1/applicationLaunchers/:id", appLauncherCtrl.GetApplicationLauncher)
+
+	r.PATCH("/v1/applicationLaunchers/:id/move", nil)
+
+	r.POST("/v1/groups", groupCtrl.CreateGroup)
+	r.GET("/v1/groups", groupCtrl.GetGroups)
 
 	// Bind website
-	r.Static("/", "dist")
+	r.Static("/home", "dist")
 
 	r.Run(":3000")
 }
