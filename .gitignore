@@ -66,4 +66,4 @@ go.work
 
 
 # database files
-db/
+db/*.sqlite
