@@ -49,16 +49,16 @@ func (ctrl *GroupController) CreateGroup(c *gin.Context) {
 }
 
 func (ctrl *GroupController) GetGroups(c *gin.Context) {
-	models := []models.Group{}
+	groups := []models.Group{}
 
-	if err := ctrl.DB.Find(&models).Error; err != nil {
+	if err := ctrl.DB.Model(&models.Group{}).Preload("ApplicationLaunchers").Find(&groups).Error; err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	res := []contracts.GetGroup{}
 
-	for _, model := range models {
+	for _, model := range groups {
 		appLaunchers := []contracts.GetApplicationLauncher{}
 
 		for _, appLauncher := range model.ApplicationLaunchers {
@@ -67,7 +67,7 @@ func (ctrl *GroupController) GetGroups(c *gin.Context) {
 				Title:          appLauncher.Title,
 				Icon:           appLauncher.Icon,
 				ApplicationUrl: appLauncher.ApplicationUrl,
-				GroupId:        appLauncher.GroupId,
+				GroupID:        appLauncher.GroupID,
 				CreatedAt:      appLauncher.CreatedAt,
 				UpdatedAt:      appLauncher.UpdatedAt,
 			})

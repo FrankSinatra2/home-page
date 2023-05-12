@@ -32,7 +32,7 @@ func (ctrl *ApplicationLauncherController) CreateApplicationLauncher(c *gin.Cont
 		Title:          body.Title,
 		ApplicationUrl: body.ApplicationUrl,
 		Icon:           body.Icon,
-		GroupId:        body.GroupId,
+		GroupID:        body.GroupID,
 	}
 
 	result := ctrl.DB.Create(&model)
@@ -50,7 +50,7 @@ func (ctrl *ApplicationLauncherController) CreateApplicationLauncher(c *gin.Cont
 		Title:          model.Title,
 		Icon:           model.Icon,
 		ApplicationUrl: model.ApplicationUrl,
-		GroupId:        model.GroupId,
+		GroupID:        model.GroupID,
 		CreatedAt:      model.CreatedAt,
 		UpdatedAt:      model.UpdatedAt,
 	}
@@ -86,10 +86,38 @@ func (ctrl *ApplicationLauncherController) GetApplicationLauncher(c *gin.Context
 		Title:          model.Title,
 		Icon:           model.Icon,
 		ApplicationUrl: model.ApplicationUrl,
-		GroupId:        model.GroupId,
+		GroupID:        model.GroupID,
 		CreatedAt:      model.CreatedAt,
 		UpdatedAt:      model.UpdatedAt,
 	}
 
 	c.JSON(http.StatusCreated, res)
+}
+
+func (ctrl *ApplicationLauncherController) UpdateApplicationLauncher(c *gin.Context) {
+	id := c.Param("id")
+
+	dbId, err := strconv.Atoi(id)
+
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	body := contracts.PatchApplicationLauncher{}
+	err = c.BindJSON(&body)
+
+	if err != nil {
+		c.Status(http.StatusUnprocessableEntity)
+		return
+	}
+
+	existing := models.ApplicationLauncher{}
+	existing.ID = uint(dbId)
+
+	if findErr := ctrl.DB.Find(&existing).Error; findErr != nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
 }

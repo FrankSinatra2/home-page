@@ -18,5 +18,5 @@ type ApplicationLauncher struct {
 	Icon           string
 	ApplicationUrl string
 
-	GroupId uint
+	GroupID uint
 }
